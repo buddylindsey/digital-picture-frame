@@ -17,6 +17,7 @@ class SlideShowWindow(QtWidgets.QDialog):
         super().__init__(parent)
 
         layout = QtWidgets.QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
 
         self.label = QtWidgets.QLabel()
         self.set_image()
@@ -26,13 +27,15 @@ class SlideShowWindow(QtWidgets.QDialog):
 
         timer = QtCore.QTimer(self)
         timer.timeout.connect(self.set_image)
-        timer.setInterval(1000)
+        timer.setInterval(2000)
         timer.start()
 
         self.showFullScreen()
 
     def set_image(self):
-        images = [f for f in os.listdir() if '.jpg' in f]
+        settings = QtCore.QSettings('digitalframe', 'digitalframe')
+        path = settings.value('images/location')
+        images = ["{}/{}".format(path, f) for f in os.listdir(path) if '.jpg' in f]
 
         image = images[randrange(0, len(images))]
 
@@ -41,34 +44,53 @@ class SlideShowWindow(QtWidgets.QDialog):
         pixmap = QPixmap(image)
         pm = pixmap.scaled(
             screen_resolution.width(), screen_resolution.height(),
-            Qt.KeepAspectRatio)
+            Qt.KeepAspectRatioByExpanding)
         self.label.setPixmap(pm)
 
-        def keyPressEvent(self, event):
-            if event.key() == QtCore.Qt.Key_Escape:
-                self.close()
-            return super().keyPressEvent(event)
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.close()
+        return super().keyPressEvent(event)
 
-        def eventFilter(self, event):
-            if event.type() == QtCore.QEvent.KeyPress:
-                return True # means stop event propagation
-            else:
-                return QtWidgets.QDialog.eventFilter(self, event)
+
+class SettingsDialog(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.settings = QtCore.QSettings('digitalframe', 'digitalframe')
+
+        layout = QtWidgets.QVBoxLayout()
+
+        image_location_label = QtWidgets.QLabel('Image Location')
+        self.image_location_text = QtWidgets.QLineEdit(self.settings.value('images/location'))
+
+        layout.addWidget(image_location_label)
+        layout.addWidget(self.image_location_text)
+
+        button_box = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Save)
+        layout.addWidget(button_box)
+        self.setLayout(layout)
+
+        button_box.accepted.connect(self.save)
+        button_box.rejected.connect(self.reject)
+
+    def save(self):
+        self.settings.setValue('images/location', self.image_location_text.text())
+        del self.settings
+        self.accept()
 
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        #app.main_window = self
 
         self.title = 'PyQt5 image'
         self.left = 10
         self.top = 10
         self.width = 1920
         self.height = 1080
-        self.initUI()
 
-    def initUI(self):
         main_widget = QtWidgets.QWidget()
         self.setCentralWidget(main_widget)
         self.setWindowTitle(self.title)
@@ -77,7 +99,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         hbox = QtWidgets.QHBoxLayout()
 
-        left = QtWidgets.QFrame()
+        left = QtWidgets.QScrollArea()
         left.setFrameShape(QtWidgets.QFrame.StyledPanel)
 
         self.vbox = QtWidgets.QVBoxLayout()
@@ -95,26 +117,26 @@ class MainWindow(QtWidgets.QMainWindow):
 
         screen_resolution = app.desktop().screenGeometry()
 
-        #timer = QtCore.QTimer(self)
-        #timer.timeout.connect(self.setImage)
-        #timer.setInterval(1000)
-        #timer.start()
-
         main_widget.setLayout(hbox)
 
         self.show()
-        #self.showFullScreen()
 
     def buildMenu(self):
-        exitAction = QtWidgets.QAction(QtGui.QIcon('exit24.png'), '&Exit', self)
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(QtWidgets.qApp.quit)
-
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
+
         fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(exitAction)
+        settings_action = QtWidgets.QAction('Settings', self)
+        settings_action.triggered.connect(self.open_settings)
+        fileMenu.addAction(settings_action)
+
+        fileMenu.addSeparator()
+
+        exit_action = QtWidgets.QAction(QtGui.QIcon('exit24.png'), '&Exit', self)
+        exit_action.setShortcut('Ctrl+Q')
+        exit_action.setStatusTip('Exit application')
+        exit_action.triggered.connect(QtWidgets.qApp.quit)
+        fileMenu.addAction(exit_action)
 
         run = menubar.addMenu('Run')
 
@@ -128,8 +150,15 @@ class MainWindow(QtWidgets.QMainWindow):
         window = SlideShowWindow(self)
         window.exec_()
 
+    def open_settings(self):
+        window = SettingsDialog(self)
+        if window.exec_():
+            self.setImage()
+
     def setImage(self):
-        images = [f for f in os.listdir() if '.jpg' in f]
+        settings = QtCore.QSettings('digitalframe', 'digitalframe')
+        path = settings.value('images/location')
+        images = ["{}/{}".format(path, f) for f in os.listdir(path) if '.jpg' in f]
 
         for image in images:
             label = QLabel()
