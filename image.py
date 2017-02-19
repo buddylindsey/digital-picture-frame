@@ -101,10 +101,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         left = QtWidgets.QScrollArea()
         left.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        left.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        left.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        left.setWidgetResizable(False)
 
+        scroll_container = QtWidgets.QWidget()
         self.vbox = QtWidgets.QVBoxLayout()
-        self.setImage()
-        left.setLayout(self.vbox)
+        scroll_container.setLayout(self.vbox)
+        left.setWidget(scroll_container)
+        self.set_image()
 
         right = QtWidgets.QFrame()
         right.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -153,9 +158,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_settings(self):
         window = SettingsDialog(self)
         if window.exec_():
-            self.setImage()
+            self.set_image()
 
-    def setImage(self):
+    def set_image(self):
         settings = QtCore.QSettings('digitalframe', 'digitalframe')
         path = settings.value('images/location')
         images = ["{}/{}".format(path, f) for f in os.listdir(path) if '.jpg' in f]
