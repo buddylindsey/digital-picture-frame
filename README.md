@@ -1,6 +1,7 @@
 # digital-picture-frame
 digital-picture-frame is a PyQt5 application meant to be multi-platform specifically to turn your monitor into a picture frame of images. Either on a raspberry-pi and 5 inch monitor in your house, or on a big 4k monitor in your photography studio.
 
+![Screenshot](https://raw.githubusercontent.com/buddylindsey/digital-picture-frame/gh-pages/images/digital-picture-frame1.png)
 
 ## Running and Development
 
