@@ -19,33 +19,34 @@ class SlideShowWindow(QtWidgets.QDialog):
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.label = QtWidgets.QLabel()
-        self.set_image()
-        layout.addWidget(self.label)
+        screen_resolution = app.desktop().screenGeometry()
+
+        self.image = ImageDisplayWidget(
+            self.get_image(), screen_resolution.width(),
+            screen_resolution.height())
+
+        layout.addWidget(self.image)
 
         self.setLayout(layout)
 
         timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.set_image)
+        timer.timeout.connect(self.change_image)
         timer.setInterval(2000)
         timer.start()
 
         self.showFullScreen()
 
-    def set_image(self):
+    def change_image(self):
+        self.image.change_image(self.get_image())
+
+    def get_image(self):
         settings = QtCore.QSettings('digitalframe', 'digitalframe')
         path = settings.value('images/location')
         images = ["{}/{}".format(path, f) for f in os.listdir(path) if '.jpg' in f]
 
         image = images[randrange(0, len(images))]
 
-        screen_resolution = app.desktop().screenGeometry()
-
-        pixmap = QPixmap(image)
-        pm = pixmap.scaled(
-            screen_resolution.width(), screen_resolution.height(),
-            Qt.KeepAspectRatioByExpanding)
-        self.label.setPixmap(pm)
+        return image
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
@@ -85,31 +86,25 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
-        self.title = 'PyQt5 image'
-        self.left = 10
-        self.top = 10
-        self.width = 1920
-        self.height = 1080
-
         main_widget = QtWidgets.QWidget()
         self.setCentralWidget(main_widget)
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setWindowTitle('Digital Picture Frame')
+        self.setGeometry(10, 10, 1920, 1080)
         self.buildMenu()
 
         hbox = QtWidgets.QHBoxLayout()
+
+        scroll_container = QtWidgets.QWidget()
+        self.vbox = QtWidgets.QVBoxLayout()
+        self.set_image()
+        scroll_container.setLayout(self.vbox)
 
         left = QtWidgets.QScrollArea()
         left.setFrameShape(QtWidgets.QFrame.StyledPanel)
         left.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         left.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         left.setWidgetResizable(False)
-
-        scroll_container = QtWidgets.QWidget()
-        self.vbox = QtWidgets.QVBoxLayout()
-        scroll_container.setLayout(self.vbox)
         left.setWidget(scroll_container)
-        self.set_image()
 
         right = QtWidgets.QFrame()
         right.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -166,11 +161,36 @@ class MainWindow(QtWidgets.QMainWindow):
         images = ["{}/{}".format(path, f) for f in os.listdir(path) if '.jpg' in f]
 
         for image in images:
-            label = QLabel()
-            pixmap = QPixmap(image)
-            pm = pixmap.scaled(200, 200, Qt.KeepAspectRatio)
-            label.setPixmap(pm)
-            self.vbox.addWidget(label)
+            image = ImageDisplayWidget(image)
+            self.vbox.addWidget(image)
+
+
+class ImageDisplayWidget(QLabel):
+    width = None
+    height = None
+    image = None
+
+    def __init__(self, image_path, width=200, height=200):
+        super().__init__()
+        self.image = image_path
+        self.width = width
+        self.height = height
+        self.change_image(self.get_image())
+
+    def change_image(self, image, width=None, height=None):
+        self.image = image
+        pixmap = QPixmap(self.image)
+        pm = pixmap.scaled(
+                width or self.width, height or self.height,
+                Qt.KeepAspectRatioByExpanding)
+        self.setPixmap(pm)
+
+    def get_image(self):
+        if self.image:
+            return self.image
+
+        raise Exception('No Image available')
+
 
 
 if __name__ == '__main__':
