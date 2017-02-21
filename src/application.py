@@ -15,7 +15,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(main_widget)
         self.setWindowTitle('Digital Picture Frame')
         self.setGeometry(10, 10, 1920, 1080)
-        self.buildMenu()
+        self.build_menu()
 
         hbox = QtWidgets.QHBoxLayout()
 
@@ -44,7 +44,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.show()
 
-    def buildMenu(self):
+    def build_menu(self):
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
 
