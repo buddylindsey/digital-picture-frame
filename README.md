@@ -19,7 +19,7 @@ $ source ~/.virtualenv/digital-frame/bin/activate
 $ git clone https://github.com/buddylindsey/digital-picture-frame.git
 $ cd digital-picture-frame
 $ pip install -r requirements.txt
-$ python image.py
+$ python main.py
 ```
 
 ### How it Works
