@@ -32,6 +32,10 @@ class MainWindow(QtWidgets.QMainWindow):
         left.setWidget(scroll_container)
 
         right = QtWidgets.QFrame()
+        self.right_image = ImageDisplayWidget('image.jpg', 1280, 720)
+        right_layout = QtWidgets.QHBoxLayout()
+        right_layout.addWidget(self.right_image)
+        right.setLayout(right_layout)
         right.setFrameShape(QtWidgets.QFrame.StyledPanel)
 
         splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
@@ -43,6 +47,10 @@ class MainWindow(QtWidgets.QMainWindow):
         main_widget.setLayout(hbox)
 
         self.show()
+
+    @QtCore.pyqtSlot(str)
+    def image_selected(self, image):
+        self.right_image.change_image(image)
 
     def build_menu(self):
         menubar = self.menuBar()
@@ -85,5 +93,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for image in images:
             image = ImageDisplayWidget(image)
+            image.clicked.connect(self.image_selected)
             self.vbox.addWidget(image)
 

@@ -4,6 +4,7 @@ from PyQt5 import QtCore
 
 
 class ImageDisplayWidget(QtWidgets.QLabel):
+    clicked = QtCore.pyqtSignal(str)
     width = None
     height = None
     image = None
@@ -29,5 +30,8 @@ class ImageDisplayWidget(QtWidgets.QLabel):
 
         raise Exception('No Image available')
 
+    def mouseReleaseEvent(self, event):
+        self.clicked.emit(self.get_image())
+        super().mouseReleaseEvent(event)
 
 
