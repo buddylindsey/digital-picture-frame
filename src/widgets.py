@@ -8,8 +8,9 @@ class ImageDisplayWidget(QtWidgets.QLabel):
     width = None
     height = None
     image = None
+    currentQRubberBand = None
 
-    def __init__(self, image_path, width=200, height=200):
+    def __init__(self, image_path, width=200, height=200, editable=False):
         super().__init__()
         self.image = QtGui.QImage(image_path)
         self.width = width
@@ -23,8 +24,8 @@ class ImageDisplayWidget(QtWidgets.QLabel):
             self.image = QtGui.QImage(image)
         pixmap = QtGui.QPixmap.fromImage(self.image)
         pm = pixmap.scaled(
-                width or self.width, height or self.height,
-                QtCore.Qt.KeepAspectRatioByExpanding)
+            width or self.width, height or self.height,
+            QtCore.Qt.KeepAspectRatioByExpanding)
         self.setPixmap(pm)
 
     def get_image(self):
@@ -37,4 +38,16 @@ class ImageDisplayWidget(QtWidgets.QLabel):
         self.clicked.emit(self.get_image())
         super().mouseReleaseEvent(event)
 
+    def mousePressEvent(self, eventQMouseEvent):
+        self.originQPoint = eventQMouseEvent.pos()
+        if not self.currentQRubberBand:
+            self.currentQRubberBand = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle, self)
+            self.currentQRubberBand.setGeometry(200, 200, 200, 200)
+            self.currentQRubberBand.show()
+        super().mousePressEvent(eventQMouseEvent)
+
+    def mouseMoveEvent (self, eventQMouseEvent):
+        if self.currentQRubberBand:
+            self.currentQRubberBand.move(eventQMouseEvent.pos())
+        super().mouseMoveEvent(eventQMouseEvent)
 

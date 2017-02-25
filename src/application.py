@@ -34,7 +34,7 @@ class MainWindow(QtWidgets.QMainWindow):
         left.setWidget(scroll_container)
 
         right = QtWidgets.QFrame()
-        self.right_image = ImageDisplayWidget('image.jpg', 1280, 720)
+        self.right_image = ImageDisplayWidget('image.jpg', 1280, 720, editable=True)
         right_layout = QtWidgets.QHBoxLayout()
         right_layout.addWidget(self.right_image)
         right.setLayout(right_layout)
