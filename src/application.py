@@ -3,8 +3,9 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
-from .widgets import ImageDisplayWidget
 from .dialogs import SettingsDialog, SlideShowWindow
+from .web import WebServer
+from .widgets import ImageDisplayWidget
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -47,6 +48,13 @@ class MainWindow(QtWidgets.QMainWindow):
         main_widget.setLayout(hbox)
 
         self.show()
+
+        self.thread = QtCore.QThread()
+        self.ws = WebServer()
+        self.ws.moveToThread(self.thread)
+
+        self.thread.started.connect(self.ws.run)
+        self.thread.start()
 
     @QtCore.pyqtSlot(str)
     def image_selected(self, image):
