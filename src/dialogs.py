@@ -2,9 +2,7 @@ import os
 import sys
 from random import randrange
 
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
-from PyQt5 import QtGui
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from .widgets import ImageDisplayWidget
 
