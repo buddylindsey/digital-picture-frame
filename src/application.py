@@ -1,10 +1,11 @@
 import os
+
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
 from .dialogs import SettingsDialog, SlideShowWindow
-from .web import WebServer
+from .web.server import WebServer
 from .widgets import ImageDisplayWidget
 
 
