@@ -57,7 +57,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread.started.connect(self.ws.run)
         self.thread.start()
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.pyqtSlot(QtGui.QImage)
     def image_selected(self, image):
         self.right_image.change_image(image)
 
