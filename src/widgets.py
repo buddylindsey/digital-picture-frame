@@ -11,14 +11,17 @@ class ImageDisplayWidget(QtWidgets.QLabel):
 
     def __init__(self, image_path, width=200, height=200):
         super().__init__()
-        self.image = image_path
+        self.image = QtGui.QImage(image_path)
         self.width = width
         self.height = height
         self.change_image(self.get_image())
 
     def change_image(self, image, width=None, height=None):
-        self.image = image
-        pixmap = QtGui.QPixmap(self.image)
+        if isinstance(image, QtGui.QImage):
+            self.image = image
+        else:
+            self.image = QtGui.QImage(image)
+        pixmap = QtGui.QPixmap.fromImage(self.image)
         pm = pixmap.scaled(
                 width or self.width, height or self.height,
                 QtCore.Qt.KeepAspectRatioByExpanding)
