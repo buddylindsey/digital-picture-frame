@@ -31,6 +31,12 @@ class ImageDisplayWidget(QtWidgets.QLabel):
         else:
             self.image = QtGui.QImage(image)
 
+    def set_image(self, image):
+        if isinstance(image, QtGui.QImage):
+            self.image = image
+        else:
+            self.image = QtGui.QImage(image)
+
     def get_image(self):
         if self.image:
             return self.image
