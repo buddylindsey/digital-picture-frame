@@ -56,25 +56,67 @@ class SettingsDialog(QtWidgets.QDialog):
 
         self.settings = QtCore.QSettings('digitalframe', 'digitalframe')
 
-        layout = QtWidgets.QVBoxLayout()
+        # Tab Widgets
+        self.tabs = QtWidgets.QTabWidget()
+        self.location_tab = QtWidgets.QWidget()
+        self.computer_tab = QtWidgets.QWidget()
 
-        image_location_label = QtWidgets.QLabel('Image Location')
-        self.image_location_text = QtWidgets.QLineEdit(
-            self.settings.value('images/location'))
+        # add widgets to tabs and add titles
+        self.tabs.addTab(self.location_tab, "Location")
+        self.tabs.addTab(self.computer_tab, "Computer")
 
-        layout.addWidget(image_location_label)
-        layout.addWidget(self.image_location_text)
+        # build the UI for each tab
+        self.build_location_tab()
+        self.build_computer_tab()
 
-        button_box = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Save)
-        layout.addWidget(button_box)
-        self.setLayout(layout)
+        # main layout for dialog
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.addWidget(self.tabs)
+        button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Save)
+        self.layout.addWidget(button_box)
 
+        self.setLayout(self.layout)
+
+        # connect methods to buttons
         button_box.accepted.connect(self.save)
         button_box.rejected.connect(self.reject)
 
+    def build_computer_tab(self):
+        computer_tab_layout = QtWidgets.QVBoxLayout()
+        aspect_ratio_label = QtWidgets.QLabel('Aspect Ratio')
+        computer_tab_layout.addWidget(aspect_ratio_label)
+
+        self.aspect_group = QtWidgets.QButtonGroup(computer_tab_layout)
+
+        def add_radio_button(label, ratio):
+            row = QtWidgets.QHBoxLayout()
+            rb = QtWidgets.QRadioButton(ratio)
+            rb.setChecked(ratio == self.settings.value('computer/aspect-ratio'))
+            row.addWidget(rb)
+            label = QtWidgets.QLabel(label)
+            label.setAlignment(QtCore.Qt.AlignRight)
+            row.addWidget(label)
+            self.aspect_group.addButton(rb)
+            computer_tab_layout.addLayout(row)
+
+        add_radio_button("800x600, 1024x768, 1280x960, 2048x1536", "4:3")
+        add_radio_button("1920x1080, 3840x2160, 3840x2160, 5120x2880", "16:9")
+        add_radio_button("1920x1200", "16:10")
+
+        self.computer_tab.setLayout(computer_tab_layout)
+
+    def build_location_tab(self):
+        location_tab_layout = QtWidgets.QVBoxLayout()
+        image_location_label = QtWidgets.QLabel('Image Location')
+        self.image_location_text = QtWidgets.QLineEdit(self.settings.value('images/location'))
+
+        location_tab_layout.addWidget(image_location_label)
+        location_tab_layout.addWidget(self.image_location_text)
+
+        self.location_tab.setLayout(location_tab_layout)
+
     def save(self):
-        self.settings.setValue(
-            'images/location', self.image_location_text.text())
+        self.settings.setValue('images/location', self.image_location_text.text())
+        self.settings.setValue('computer/aspect-ratio', self.aspect_group.checkedButton().text())
         del self.settings
         self.accept()
