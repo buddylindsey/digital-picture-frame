@@ -19,7 +19,15 @@ class ImageDisplayWidget(QtWidgets.QLabel):
 
     def change_image(self, image, width=None, height=None):
         self.set_image(image)
-        pixmap = QtGui.QPixmap.fromImage(self.get_image())
+
+        img = self.get_image()
+        settings = QtCore.QSettings('digitalframe', 'digitalframe')
+        w, h = settings.value('computer/aspect-ratio').split(':')
+        adjusted_height = img.width() / (int(w)/int(h))
+        adjusted_image = img.copy(0, 0, img.width(), adjusted_height)
+
+        pixmap = QtGui.QPixmap.fromImage(adjusted_image)
+
         pm = pixmap.scaled(
             width or self.width, height or self.height,
             QtCore.Qt.KeepAspectRatioByExpanding)

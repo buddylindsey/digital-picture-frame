@@ -7,6 +7,10 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from .widgets import ImageDisplayWidget
 
 
+ASPECT_RATIO = 'computer/aspect-ratio'
+IMAGE_LOCATION = 'images/location'
+
+
 class SlideShowWindow(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -37,7 +41,7 @@ class SlideShowWindow(QtWidgets.QDialog):
 
     def get_image(self):
         settings = QtCore.QSettings('digitalframe', 'digitalframe')
-        path = settings.value('images/location')
+        path = settings.value(IMAGE_LOCATION)
         images = ["{}/{}".format(path, f) for f in os.listdir(path) if '.jpg' in f]
 
         image = images[randrange(0, len(images))]
@@ -51,8 +55,6 @@ class SlideShowWindow(QtWidgets.QDialog):
 
 
 class SettingsDialog(QtWidgets.QDialog):
-    ASPECT_RATIO = 'computer/aspect-ratio'
-    IMAGE_LOCATION = 'images/location'
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -94,7 +96,7 @@ class SettingsDialog(QtWidgets.QDialog):
         def add_radio_button(label, ratio):
             row = QtWidgets.QHBoxLayout()
             rb = QtWidgets.QRadioButton(ratio)
-            rb.setChecked(ratio == self.settings.value(self.ASPECT_RATIO))
+            rb.setChecked(ratio == self.settings.value(ASPECT_RATIO))
             row.addWidget(rb)
             label = QtWidgets.QLabel(label)
             label.setAlignment(QtCore.Qt.AlignRight)
@@ -111,7 +113,7 @@ class SettingsDialog(QtWidgets.QDialog):
     def build_location_tab(self):
         location_tab_layout = QtWidgets.QVBoxLayout()
         image_location_label = QtWidgets.QLabel('Image Location')
-        self.image_location_text = QtWidgets.QLineEdit(self.settings.value(self.IMAGE_LOCATION))
+        self.image_location_text = QtWidgets.QLineEdit(self.settings.value(IMAGE_LOCATION))
 
         location_tab_layout.addWidget(image_location_label)
         location_tab_layout.addWidget(self.image_location_text)
@@ -119,7 +121,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.location_tab.setLayout(location_tab_layout)
 
     def save(self):
-        self.settings.setValue(self.IMAGE_LOCATION, self.image_location_text.text())
-        self.settings.setValue(self.ASPECT_RATIO, self.aspect_group.checkedButton().text())
+        self.settings.setValue(IMAGE_LOCATION, self.image_location_text.text())
+        self.settings.setValue(ASPECT_RATIO, self.aspect_group.checkedButton().text())
         del self.settings
         self.accept()
